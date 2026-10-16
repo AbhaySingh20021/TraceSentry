@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -48,7 +48,7 @@ def initialize() -> None:
 def save_trace(trace: TraceDocument) -> dict[str, Any]:
     initialize()
     run_id = str(uuid4())
-    created_at = datetime.now(timezone.utc).isoformat()
+    created_at = datetime.now(UTC).isoformat()
     payload = trace.model_dump(mode="json")
     with connect() as connection:
         connection.execute(
