@@ -1,0 +1,13 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      TRACESENTRY_DB: /data/traces.db
+    volumes:
+      - tracesentry-data:/data
+    restart: unless-stopped
+
+volumes:
+  tracesentry-data:
