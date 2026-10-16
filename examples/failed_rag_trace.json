@@ -1,0 +1,48 @@
+{
+  "trace_id": "demo-rag-empty-retrieval-001",
+  "source": "example",
+  "metadata": {
+    "scenario": "retrieval returned zero documents before answer generation",
+    "expected_findings": ["EMPTY_RETRIEVAL", "SLOW_SPAN"]
+  },
+  "input": "What is the cancellation period in the supplier agreement?",
+  "output": "The cancellation period is 30 days.",
+  "spans": [
+    {
+      "span_id": "span-1",
+      "name": "agent.run",
+      "start_time": "2026-01-12T10:00:00Z",
+      "duration_ms": 12450,
+      "status": "ok",
+      "attributes": {
+        "agent.name": "contract_assistant",
+        "llm.provider": "demo"
+      }
+    },
+    {
+      "span_id": "span-2",
+      "parent_span_id": "span-1",
+      "name": "retriever.search",
+      "start_time": "2026-01-12T10:00:00Z",
+      "duration_ms": 10300,
+      "status": "ok",
+      "attributes": {
+        "query": "supplier agreement cancellation period",
+        "result_count": 0,
+        "index": "contracts-demo"
+      }
+    },
+    {
+      "span_id": "span-3",
+      "parent_span_id": "span-1",
+      "name": "llm.generate",
+      "start_time": "2026-01-12T10:00:10Z",
+      "duration_ms": 1800,
+      "status": "ok",
+      "attributes": {
+        "model": "demo-model",
+        "grounding_document_count": 0
+      }
+    }
+  ]
+}
