@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>TraceSentry — Agent Trace Explorer</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="TraceSentry home">
+        <span class="brand-mark">TS</span>
+        <span><strong>TraceSentry</strong><small>AI observability</small></span>
+      </a>
+      <div class="nav-label">WORKSPACE</div>
+      <button class="nav-item active" type="button"><span>◫</span> Trace explorer <span class="nav-count" id="run-count">0</span></button>
+      <div class="sidebar-note">
+        <span class="status-dot"></span>
+        <div><strong>Local workspace</strong><small>Traces stay on your machine</small></div>
+      </div>
+      <div class="sidebar-footer">EARLY ACCESS <span>v0.1.0</span></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumbs">Workspace <span>/</span> <strong>Trace explorer</strong></div>
+        <div class="connection"><span class="status-dot" id="connection-dot"></span><span id="connection-label">Connecting to API…</span></div>
+      </header>
+
+      <section class="page-heading">
+        <div>
+          <div class="eyebrow">DEBUG WITH EVIDENCE</div>
+          <h1>Trace explorer</h1>
+          <p>Understand what your agent did, where it slowed down, and which signals need investigation.</p>
+        </div>
+        <div class="heading-actions">
+          <button class="button button-secondary" id="refresh-button" type="button">↻ Refresh</button>
+          <button class="button button-primary" id="demo-button" type="button">＋ Load demo trace</button>
+        </div>
+      </section>
+
+      <div class="alert hidden" id="alert" role="status"></div>
+
+      <section class="stats-grid" aria-label="Trace summary">
+        <article class="stat-card"><div class="stat-label">TOTAL RUNS <span>↗</span></div><div class="stat-value" id="stat-runs">—</div><div class="stat-foot">Stored locally</div></article>
+        <article class="stat-card"><div class="stat-label">SPANS IN SELECTED RUN <span>⌘</span></div><div class="stat-value" id="stat-spans">—</div><div class="stat-foot">Operations recorded</div></article>
+        <article class="stat-card"><div class="stat-label">TRACE DURATION <span>◷</span></div><div class="stat-value" id="stat-duration">—</div><div class="stat-foot">Sum of span durations</div></article>
+        <article class="stat-card"><div class="stat-label">FINDINGS <span>⌁</span></div><div class="stat-value" id="stat-findings">—</div><div class="stat-foot" id="stat-findings-foot">Run analysis to inspect signals</div></article>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel runs-panel">
+          <div class="panel-heading"><div><h2>Recent runs</h2><p>Select a run to inspect its execution.</p></div><span class="live-pill"><i></i> LOCAL</span></div>
+          <div class="run-list" id="run-list"><div class="empty-state">Loading trace runs…</div></div>
+        </article>
+
+        <article class="panel detail-panel">
+          <div class="panel-heading detail-heading">
+            <div><div class="eyebrow">EXECUTION DETAILS</div><h2 id="detail-title">Select a trace</h2><p id="detail-subtitle">Choose a run from the list or load the demo trace.</p></div>
+            <button class="button button-secondary button-small" id="analyze-button" type="button" disabled>Analyze run</button>
+          </div>
+
+          <div class="section-heading"><h3>Span timeline</h3><span class="muted" id="span-count-label">No spans</span></div>
+          <div class="timeline" id="timeline"><div class="empty-state">Your trace timeline will appear here.</div></div>
+
+          <div class="section-heading findings-heading"><h3>Failure signals</h3><span class="muted" id="analyzer-label">Evidence-linked heuristics</span></div>
+          <div class="findings-list" id="findings"><div class="empty-state">Analyze a run to surface potential failure signals.</div></div>
+
+          <div class="section-heading"><h3>Trace payload</h3><span class="muted">Raw JSON</span></div>
+          <pre class="json-view" id="raw-json">Select a run to inspect its payload.</pre>
+        </article>
+      </section>
+      <footer class="page-footer"><span>TraceSentry</span><span>Find the failure. Follow the evidence.</span><a href="https://github.com/AbhaySingh20021/TraceSentry" target="_blank" rel="noreferrer">Source on GitHub ↗</a></footer>
+    </main>
+  </div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
