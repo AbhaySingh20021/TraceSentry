@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -22,7 +22,7 @@ class TraceSpan(BaseModel):
     span_id: str = Field(min_length=1, max_length=200)
     parent_span_id: str | None = None
     name: str = Field(min_length=1, max_length=500)
-    start_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    start_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
     duration_ms: float = Field(ge=0)
     status: Literal["ok", "error", "unset"] = "unset"
     attributes: dict[str, Any] = Field(default_factory=dict)
@@ -32,7 +32,7 @@ class TraceSpan(BaseModel):
     @classmethod
     def require_timezone(cls, value: datetime) -> datetime:
         if value.tzinfo is None:
-            return value.replace(tzinfo=timezone.utc)
+            return value.replace(tzinfo=UTC)
         return value
 
 
