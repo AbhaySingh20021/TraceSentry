@@ -132,7 +132,15 @@ class TraceSentryCallbackHandler(BaseCallbackHandler):
         parent_run_id: Any = None,
         **attributes: Any,
     ) -> None:
-        name = (serialized or {}).get("name") or (serialized or {}).get("id", [kind])[-1]
+        serialized = serialized or {}
+        serialized_id = serialized.get("id", [])
+        if isinstance(serialized_id, (list, tuple)) and serialized_id:
+            fallback_name = serialized_id[-1]
+        elif isinstance(serialized_id, str):
+            fallback_name = serialized_id.rsplit(".", 1)[-1]
+        else:
+            fallback_name = kind
+        name = serialized.get("name") or fallback_name
         self._start(run_id, parent_run_id, f"{kind}.{name}", attributes)
 
     def on_chain_start(
