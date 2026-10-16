@@ -41,7 +41,7 @@ class TraceDocument(BaseModel):
 
     trace_id: str = Field(min_length=1, max_length=200)
     spans: list[TraceSpan] = Field(min_length=1, max_length=10_000)
-    received_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    received_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     source: str = Field(default="manual", max_length=200)
     metadata: dict[str, Any] = Field(default_factory=dict)
     input: Any | None = None
