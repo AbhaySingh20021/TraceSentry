@@ -38,7 +38,10 @@ def analyze_trace(run: dict[str, Any]) -> dict[str, Any]:
                     "code": "SPAN_ERROR",
                     "severity": "high",
                     "title": f"Span failed: {span.get('name', span_id)}",
-                    "explanation": (\n                        "This span is explicitly marked as an error. Inspect its recorded " \n                        "exception or error attributes."\n                    ),
+                    "explanation": (
+                        "This span is explicitly marked as an error. Inspect its recorded "
+                        "exception or error attributes."
+                    ),
                     "span_ids": [span_id],
                     "evidence": {"status": status, "attributes": attributes},
                 }
@@ -52,7 +55,10 @@ def analyze_trace(run: dict[str, Any]) -> dict[str, Any]:
                         "code": "EMPTY_RETRIEVAL",
                         "severity": "high",
                         "title": "Retrieval returned no documents",
-                        "explanation": (\n                        "The span attributes report zero retrieved documents. A downstream " \n                        "answer may lack supporting context."\n                    ),
+                        "explanation": (
+                            "The span attributes report zero retrieved documents. A downstream "
+                            "answer may lack supporting context."
+                        ),
                         "span_ids": [span_id],
                         "evidence": {
                             "result_count": count,
@@ -69,7 +75,10 @@ def analyze_trace(run: dict[str, Any]) -> dict[str, Any]:
                         "code": "TOOL_ERROR_ATTRIBUTE",
                         "severity": "warning",
                         "title": "Tool span contains an error attribute",
-                        "explanation": (\n                        "The span status is not marked as an error, but its attributes contain " \n                        "an error value. Check status mapping and tool handling."\n                    ),
+                        "explanation": (
+                            "The span status is not marked as an error, but its attributes contain "
+                            "an error value. Check status mapping and tool handling."
+                        ),
                         "span_ids": [span_id],
                         "evidence": {"error": error_value},
                     }
@@ -81,7 +90,10 @@ def analyze_trace(run: dict[str, Any]) -> dict[str, Any]:
                     "code": "SLOW_SPAN",
                     "severity": "warning",
                     "title": f"Slow span: {span.get('name', span_id)}",
-                    "explanation": (\n                        "This span took at least 10 seconds. Compare provider latency, retries, " \n                        "queueing, and tool execution."\n                    ),
+                    "explanation": (
+                        "This span took at least 10 seconds. Compare provider latency, retries, "
+                        "queueing, and tool execution."
+                    ),
                     "span_ids": [span_id],
                     "evidence": {"duration_ms": span["duration_ms"], "threshold_ms": 10_000},
                 }
@@ -93,7 +105,10 @@ def analyze_trace(run: dict[str, Any]) -> dict[str, Any]:
                 "code": "NO_RULE_MATCH",
                 "severity": "info",
                 "title": "No known failure signal detected",
-                "explanation": (\n                        "The current heuristic rules did not match this trace. This is not proof " \n                        "that the answer is correct or grounded."\n                    ),
+                "explanation": (
+                    "The current heuristic rules did not match this trace. This is not proof "
+                    "that the answer is correct or grounded."
+                ),
                 "span_ids": [],
                 "evidence": {"analyzer_version": ANALYZER_VERSION},
             }
