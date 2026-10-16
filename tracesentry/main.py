@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 from tracesentry import storage
 from tracesentry.analyzer import analyze_trace
@@ -23,6 +24,21 @@ app = FastAPI(
     description="Local-first trace ingestion and explainable failure heuristics for LLM systems.",
     version="0.1.0",
     lifespan=lifespan,
+)
+
+# Development-only local origins for the static dashboard. Restrict this list
+# to your actual dashboard origin when deploying anywhere beyond localhost.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:8080",
+        "http://localhost:8080",
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+    ],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
 
 
