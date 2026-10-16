@@ -2,19 +2,19 @@
 
 TraceSentry is an open-source debugging and evaluation workbench for LLM applications and tool-using agents. It ingests execution traces, highlights likely failure points, and makes it easier to reproduce failures and compare runs.
 
-> Status: early-stage starter. The repository currently provides a local API, trace schema, deterministic failure heuristics, sample traces, and tests. Model-based diagnosis and production integrations are planned extensions—not claimed as implemented.
+> Status: early-stage starter. The repository provides a local API, trace schema, deterministic failure heuristics, a dashboard, and an optional LangChain callback adapter. OTLP ingestion, model-based diagnosis, replay, and production integrations are future work.
 
 ## Why TraceSentry?
 
 LLM systems can fail for reasons that are difficult to distinguish from the final answer alone: poor retrieval, tool errors, unsupported claims, latency, or prompt changes. TraceSentry gives each run a structured timeline and a reproducible analysis report.
 
-## MVP features
+## Features
 
-- Ingest JSON traces through a FastAPI endpoint.
-- Normalize spans and validate trace payloads.
-- Identify common signals such as tool errors, empty retrieval, high latency, and missing evidence.
-- Persist runs locally in SQLite for a zero-service setup.
-- Inspect runs through a small API and replay deterministic analysis.
+- Ingest JSON traces through FastAPI and persist runs locally in SQLite.
+- Inspect runs through a static dashboard and API.
+- Detect common signals such as tool errors, empty retrieval, and high latency.
+- Capture LangChain chain, LLM, tool, and retriever callbacks with the optional integration.
+- Redact prompt/query/input/output content by default in exported traces.
 - Run tests and lint checks in CI.
 
 ## Quick start
@@ -30,53 +30,65 @@ pip install -e ".[dev]"
 uvicorn tracesentry.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000/docs` for the API explorer and `http://127.0.0.1:8000/health` for a health check.\n\n## Dashboard\n\nWith the API running, open a second terminal at the repository root and run:\n\n```bash\npython -m http.server 8080\n```\n\nVisit `http://127.0.0.1:8080/dashboard/`. Click **Load demo trace** to ingest the synthetic RAG failure, select it, then click **Analyze run**. The dashboard uses the local API at `http://127.0.0.1:8000`; this is a development setup, not a production deployment.
+Open `http://127.0.0.1:8000/docs` for the API explorer.
 
-## API sketch
+## Dashboard
+
+With the API running, open a second terminal at the repository root:
+
+```bash
+python -m http.server 8080
+```
+
+Visit `http://127.0.0.1:8080/dashboard/`. Load the synthetic failed-RAG example, select the run, then click **Analyze run**.
+
+## Capture a real LangChain/LangGraph execution
+
+Install the optional integration:
+
+```bash
+pip install -e ".[langchain]"
+```
+
+Example for a LangChain runnable or LangGraph compiled graph:
+
+```python
+import requests
+from tracesentry.integrations.langchain import TraceSentryCallbackHandler
+
+handler = TraceSentryCallbackHandler(
+    metadata={"environment": "local", "feature": "support-agent"}
+)
+
+# Use your existing runnable or compiled LangGraph graph:
+result = graph.invoke(
+    {"messages": [{"role": "user", "content": "Where is my order?"}]},
+    config={"callbacks": [handler]},
+)
+
+# Content is redacted by default in the exported trace.
+trace = handler.to_trace_document()
+response = requests.post("http://127.0.0.1:8000/v1/traces", json=trace, timeout=10)
+response.raise_for_status()
+print(response.json())
+```
+
+The example assumes `graph` is your existing LangChain runnable or compiled LangGraph graph and `requests` is installed in your application. Use a fresh handler per request. Callback coverage depends on the components and execution path used.
+
+### Content and privacy
+
+The adapter records timing, names, status, error messages, retrieval counts, and limited metadata. Prompt, message, query, input, and output content is redacted in `to_trace_document()` by default. Call `to_trace_document(include_content=True)` only if your data-handling policy permits it. Error messages and tool metadata may still contain sensitive information; review them before sharing traces.
+
+## API
 
 - `GET /health` — service health.
 - `POST /v1/traces` — ingest a trace document.
 - `GET /v1/runs` — list recent runs.
-- `GET /v1/runs/{run_id}` — inspect a run and its spans.
+- `GET /v1/runs/{run_id}` — inspect a run.
 - `POST /v1/runs/{run_id}/analyze` — generate a deterministic failure report.
 
-See [`docs/architecture.md`](docs/architecture.md) and [`examples/`](examples/) for details.
+See [architecture notes](docs/architecture.md) and [dashboard setup](dashboard/README.md).
 
-## Example trace
+## Current limitations
 
-A trace is a JSON object with a `trace_id`, optional metadata, and a list of spans. Each span has a unique `span_id`, a name, a start time, a duration, a status, and optional attributes/events. The sample in `examples/failed_rag_trace.json` demonstrates a retrieval span returning zero documents before an agent produces an answer.
-
-## Development
-
-```bash
-pip install -e ".[dev]"
-pytest
-ruff check .
-```
-
-## Roadmap
-
-- [x] Trace schema and API foundation
-- [x] Local persistence and deterministic failure heuristics
-- [x] Example failure traces and tests
-- [ ] OpenTelemetry OTLP ingestion adapter
-- [ ] LangGraph callback integration
-- [ ] Replay runner for stored input and tool fixtures
-- [ ] Before/after evaluation comparisons
-- [ ] Optional model-assisted diagnosis with evidence-linked explanations
-- [ ] Web dashboard
-
-## Design principles
-
-1. **Evidence before explanation:** every finding should reference a span or event.
-2. **Reproducibility:** store input traces and version analysis rules.
-3. **Provider-neutral core:** don't require a particular LLM provider to ingest or inspect traces.
-4. **Safe by default:** avoid logging secrets; treat trace attributes as potentially sensitive.
-
-## Security and privacy
-
-Traces may contain prompts, customer data, credentials, or retrieved documents. Do not ingest production data without appropriate authorization and redaction. This MVP is intended for local development; it is not yet hardened for multi-tenant or internet-facing deployment. Never commit `.env` files or API keys.
-
-## License
-
-MIT. See [`LICENSE`](LICENSE).
+The callback adapter is a first integration slice, not a complete OpenTelemetry implementation. It does not yet capture token/cost metrics consistently across providers, stream events, or provide replay. Trace payloads should be reviewed for sensitive information before ingestion into shared environments.
