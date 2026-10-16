@@ -30,7 +30,7 @@ pip install -e ".[dev]"
 uvicorn tracesentry.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000/docs` for the API explorer and `http://127.0.0.1:8000/health` for a health check.
+Open `http://127.0.0.1:8000/docs` for the API explorer and `http://127.0.0.1:8000/health` for a health check.\n\n## Dashboard\n\nWith the API running, open a second terminal at the repository root and run:\n\n```bash\npython -m http.server 8080\n```\n\nVisit `http://127.0.0.1:8080/dashboard/`. Click **Load demo trace** to ingest the synthetic RAG failure, select it, then click **Analyze run**. The dashboard uses the local API at `http://127.0.0.1:8000`; this is a development setup, not a production deployment.
 
 ## API sketch
 
